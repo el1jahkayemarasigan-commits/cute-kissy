@@ -3,142 +3,240 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>tiny kissy surprise</title>
+<title>tiny kissy bunny</title>
 <style>
-  :root{--bg:#071028;--accent:#ff6b9a;--muted:#9fb0c8}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#e7f2ff;background:
-    radial-gradient(circle at 10% 10%, rgba(124,92,255,0.06), transparent 10%),
-    linear-gradient(180deg,#071028 0%, #031323 100%);display:grid;place-items:center;}
-  .wrap{width:min(680px,96vw);padding:28px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 10px 30px rgba(1,8,20,0.7);text-align:center;position:relative}
-  h1{margin:0 0 6px;font-size:1.3rem}
-  p.lead{margin:0 0 14px;color:var(--muted)}
-  .stage{position:relative;height:320px;display:flex;align-items:center;justify-content:center;pointer-events:none}
-  .char-btn{width:200px;height:200px;border-radius:999px;display:grid;place-items:center;cursor:pointer;pointer-events:auto}
-  svg{width:170px;height:170px;display:block}
-  #mouth{transform-origin:center;transition:transform 160ms cubic-bezier(.2,.8,.2,1)}
-  .pucker #mouth{transform:scaleX(.45) translateY(6px) scaleY(.9)}
-  .blink #eye-l, .blink #eye-r{transform:scaleY(.2);transition:transform 120ms linear}
-  .bubble{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:12px;padding:10px 14px;border:1px solid rgba(255,255,255,0.03);font-weight:600;opacity:0;transform-origin:bottom center;transition:all 260ms ease}
-  .bubble.show{opacity:1;transform:translateX(-50%) translateY(-8px) scale(1)}
-  .heart { position:absolute; font-size:20px; pointer-events:none; transform:translate(-50%,0) scale(.9); opacity:1; will-change:transform,opacity; animation:floatUp 1400ms cubic-bezier(.2,.9,.25,1); text-shadow:0 2px 6px rgba(0,0,0,0.45); }
-  @keyframes floatUp {
-    0% { transform: translate(-50%,0) translateX(0) scale(.9); opacity:1; }
-    40% { transform: translate(-50%,-50px) translateX(var(--x)) scale(1.05); opacity:1; }
-    100% { transform: translate(-50%,-150px) translateX(calc(var(--x) * 1.6)) scale(.8) rotate(30deg); opacity:0; }
+  :root{
+    --bg:#071028; --panel:#071623;
+    --accent:#ff6b9a; --muted:#9fb0c8; --glass: rgba(255,255,255,0.03);
+    --heart-1: #ff6b9a; --heart-2: #ff9ac8; --heart-3:#ffd6e0;
+    --btn-bg: rgba(255,255,255,0.03);
   }
-  .hint{margin-top:12px;color:var(--muted);font-size:0.9rem}
-  @media (max-width:420px){ .wrap{padding:20px} .stage{height:260px} }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#e7f2ff;background:linear-gradient(180deg,#071027 0%, #041726 100%);display:flex;align-items:center;justify-content:center;}
+  .container{width:min(760px,96vw);margin:28px;padding:22px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 14px 40px rgba(3,9,20,0.8);position:relative;overflow:hidden}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  h1{margin:0;font-size:1.25rem}
+  .subtitle{color:var(--muted);font-size:0.92rem;margin-top:6px}
+  main{display:flex;gap:20px;align-items:center;padding-top:12px;flex-wrap:wrap}
+  .stage{flex:1;min-width:260px;display:grid;place-items:center;position:relative;padding:18px}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.01));padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,0.03);width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center}
+  .bunny-btn{width:240px;height:240px;border-radius:999px;display:grid;place-items:center;cursor:pointer;outline:none;border:4px solid rgba(255,255,255,0.02);transition:transform 140ms ease, box-shadow 140ms ease; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.02), transparent 30%);}
+  .bunny-btn:active{transform:scale(.98)}
+  svg{width:180px;height:180px;display:block}
+  .nameLine{margin-top:12px;font-weight:600}
+  .bubble{margin-top:8px;font-weight:600;color:#fff;padding:8px 12px;border-radius:999px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);opacity:0;transform:translateY(6px) scale(.98);transition:all 260ms ease}
+  .bubble.show{opacity:1;transform:translateY(0) scale(1)}
+  /* hearts */
+  .stage .heart{position:absolute;pointer-events:none;font-size:22px;text-shadow:0 6px 18px rgba(0,0,0,0.45);will-change:transform,opacity;animation:floatUp 1400ms cubic-bezier(.2,.9,.2,1)}
+  @keyframes floatUp {
+    0%{transform:translateY(0) scale(.95);opacity:1}
+    30%{transform:translateY(-30px) scale(1.05)}
+    100%{transform:translateY(-160px) scale(.8);opacity:0}
+  }
+  /* small controls */
+  .controls{display:flex;flex-direction:column;gap:10px;min-width:220px}
+  .bg-presets{display:flex;gap:8px;flex-wrap:wrap}
+  .bg-button{background:var(--btn-bg);border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--muted);font-size:0.85rem}
+  .bg-button.active{outline:2px solid rgba(255,255,255,0.04);color:#fff}
+  .small{font-size:0.84rem;padding:8px 10px}
+  footer{margin-top:12px;color:var(--muted);font-size:0.88rem;text-align:center}
+  /* backgrounds (applied to body when chosen) */
+  .bg-soft{background:linear-gradient(180deg,#ff9ac8 0%, #ffd6e0 100%)}
+  .bg-night{background:radial-gradient(ellipse at 20% 20%, #222b66 0%, rgba(2,8,30,0.9) 35%), linear-gradient(180deg,#071027 0%, #041726 100%)}
+  .bg-sky{background:linear-gradient(180deg,#a6ddff 0%, #6fb8ff 40%, #071027 100%)}
+  .bg-aurora{background:linear-gradient(180deg,#072b2f 0%, #102a3a 30%), radial-gradient(circle at 20% 20%, rgba(124,92,255,0.12), transparent 8%)}
+  /* responsive */
+  @media (max-width:720px){ .controls{min-width:unset;width:100%} .container{padding:14px} .bunny-btn{width:190px;height:190px} svg{width:150px;height:150px} }
 </style>
 </head>
 <body>
-  <main class="wrap" aria-label="Cute kissy surprise">
-    <h1 id="title">For <span id="nameText">you</span> — click to get kisses</h1>
-    <p class="lead">Click or tap the face to make it blow kisses. Save the file and share the link!</p>
+  <div class="container" role="main" aria-label="Cute kissy bunny page">
+    <header>
+      <div>
+        <h1 id="title">For <span id="nameText">you</span> — a tiny surprise</h1>
+        <div class="subtitle">Click the bunny to blow kisses 💕 (press Space/Enter when focused)</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:0.85rem;color:var(--muted)">Made with ❤️</div>
+      </div>
+    </header>
 
-    <div class="stage" id="stage">
-      <div class="char-btn" id="charBtn" role="button" aria-pressed="false" tabindex="0" title="Click me!">
-        <svg viewBox="0 0 120 120" aria-hidden="true">
-          <defs>
-            <linearGradient id="skin" x1="0" x2="1">
-              <stop offset="0" stop-color="#ffd9c2"/>
-              <stop offset="1" stop-color="#ffb79b"/>
-            </linearGradient>
-            <radialGradient id="cheekGrad" cx="50%" cy="50%">
-              <stop offset="0" stop-color="#ff8fb2"/>
-              <stop offset="1" stop-color="#ff6b9a"/>
-            </radialGradient>
-          </defs>
+    <main>
+      <div class="stage panel" id="stage">
+        <button class="bunny-btn" id="bunny" title="Click to blow kisses" aria-label="Bunny — click to blow kisses">
+          <!-- Cute chibi bunny SVG -->
+          <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="skin" x1="0" x2="1"><stop offset="0" stop-color="#fffefd"/><stop offset="1" stop-color="#ffe9f1"/></linearGradient>
+            </defs>
+            <!-- left ear -->
+            <g transform="translate(34,10)">
+              <ellipse cx="0" cy="18" rx="12" ry="28" fill="#fff"/>
+              <ellipse cx="-2" cy="10" rx="5" ry="12" fill="#ffd6e7" opacity="0.95"/>
+            </g>
+            <!-- right ear -->
+            <g transform="translate(86,10)">
+              <ellipse cx="0" cy="18" rx="12" ry="28" fill="#fff"/>
+              <ellipse cx="-2" cy="10" rx="5" ry="12" fill="#ffd6e7" opacity="0.95"/>
+            </g>
 
-          <circle cx="60" cy="60" r="46" fill="url(#skin)" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
-          <g id="eyes">
-            <ellipse id="eye-l" cx="44" cy="52" rx="6" ry="5.2" fill="#082" transform="none"/>
-            <ellipse id="eye-r" cx="76" cy="52" rx="6" ry="5.2" fill="#082" transform="none"/>
-          </g>
-          <ellipse cx="45" cy="70" rx="8" ry="5" fill="url(#cheekGrad)" opacity="0.95"/>
-          <ellipse cx="75" cy="70" rx="8" ry="5" fill="url(#cheekGrad)" opacity="0.95"/>
-          <g id="mouth" transform="translate(60,86)">
-            <ellipse cx="0" cy="0" rx="10" ry="6" fill="#882b58"/>
-            <ellipse cx="-1" cy="-1" rx="6" ry="3" fill="#ff6b9a" opacity="0.9"/>
-          </g>
-        </svg>
+            <!-- face -->
+            <g transform="translate(60,62)">
+              <circle cx="0" cy="-2" r="36" fill="url(#skin)" stroke="rgba(0,0,0,0.06)"/>
+              <!-- cheeks -->
+              <ellipse cx="-18" cy="6" rx="8" ry="5.5" fill="#ffb1c9" opacity="0.95"/>
+              <ellipse cx="18" cy="6" rx="8" ry="5.5" fill="#ffb1c9" opacity="0.95"/>
+              <!-- eyes -->
+              <g id="eyes">
+                <ellipse id="eye-l" cx="-12" cy="-6" rx="4.8" ry="4.4" fill="#2b2b2b"/>
+                <ellipse id="eye-r" cx="12" cy="-6" rx="4.8" ry="4.4" fill="#2b2b2b"/>
+              </g>
+              <!-- nose & mouth -->
+              <g id="mouth" transform="translate(0,8)">
+                <path id="nose" d="M0 0 q4 6 0 10 q-4-4 0-10" fill="#e67398"/>
+              </g>
+            </g>
+          </svg>
+        </button>
+
+        <div class="nameLine" id="nameLine">— <span id="smallText">i love you</span> —</div>
+        <div class="bubble" id="bubble">i love you 💖</div>
       </div>
 
-      <div class="bubble" id="bubble" role="status" aria-live="polite">i love you 💖</div>
-    </div>
+      <aside class="controls panel" aria-label="Controls">
+        <div style="margin-bottom:8px;font-weight:700">Backgrounds</div>
+        <div class="bg-presets" id="bgPresets">
+          <button class="bg-button" data-bg="soft">Soft ♥</button>
+          <button class="bg-button" data-bg="night">Night ✨</button>
+          <button class="bg-button" data-bg="sky">Sky ☁️</button>
+          <button class="bg-button" data-bg="aurora">Aurora</button>
+          <button class="bg-button" id="randomBg">Random</button>
+        </div>
 
-    <div class="hint">Tip: press space or enter when focused on the face (accessibility)</div>
-  </main>
+        <div style="margin-top:12px">
+          <div style="font-weight:700;margin-bottom:6px">Options</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="bg-button small" id="autoName">Show first name only</button>
+            <button class="bg-button small" id="resetBg">Reset BG</button>
+          </div>
+        </div>
+
+        <footer>Tip: use Space or Enter when the bunny is focused.</footer>
+      </aside>
+    </main>
+  </div>
 
 <script>
-(function setNameFromURL(){
+/* Utilities */
+function qs(q, el=document) { return el.querySelector(q); }
+function qsa(q, el=document) { return Array.from(el.querySelectorAll(q)); }
+function sanitizeName(s){
+  if(!s) return '';
+  return s.replace(/[<>\/\\{}[\]]/g,'').trim().slice(0,24);
+}
+
+/* Name handling – show FIRST name by default */
+(function setName(){
   const params = new URLSearchParams(location.search);
-  const n = params.get('name');
-  if(n){
-    const clean = n.replace(/[<>]/g,'').trim().slice(0,24);
-    document.getElementById('nameText').textContent = clean || 'you';
-    document.getElementById('bubble').textContent = `i love you, ${clean} ❤`;
-  }
+  const raw = params.get('name') || '';
+  const cleaned = sanitizeName(raw);
+  const first = cleaned ? cleaned.split(' ')[0] : '';
+  const nameText = first || 'you';
+  document.getElementById('nameText').textContent = nameText;
+  const small = first ? `i love you, ${first}` : 'i love you';
+  document.getElementById('smallText').textContent = small;
 })();
 
-const charBtn = document.getElementById('charBtn');
+/* Heart spawning */
 const stage = document.getElementById('stage');
-const bubble = document.getElementById('bubble');
-
-let lastAction = 0;
-function spawnHeart(x,y){
-  const heart = document.createElement('div');
-  heart.className = 'heart';
-  const hearts = ['💖','💗','💕','💘','❣️','❤️'];
-  heart.textContent = hearts[Math.floor(Math.random()*hearts.length)];
-  const randX = (Math.random()*60 - 30) + 'px';
-  heart.style.setProperty('--x', randX);
+function spawnHeartAt(x, y){
+  const el = document.createElement('div');
+  el.className = 'heart';
+  const hearts = ['💖','💗','💕','❤️','❣️','💘','💞'];
+  el.textContent = hearts[Math.floor(Math.random()*hearts.length)];
   const rect = stage.getBoundingClientRect();
-  heart.style.left = (x - rect.left) + 'px';
-  heart.style.top = (y - rect.top) + 'px';
-  stage.appendChild(heart);
-  heart.addEventListener('animationend', ()=> heart.remove());
+  el.style.left = (x - rect.left) + 'px';
+  el.style.top = (y - rect.top) + 'px';
+  el.style.transform = `translate(-50%,0) rotate(${Math.random()*40-20}deg)`;
+  stage.appendChild(el);
+  el.addEventListener('animationend', ()=> el.remove());
 }
 
-function mouthCenterClient() {
-  const mouth = document.getElementById('mouth');
-  const r = mouth.getBoundingClientRect();
-  return { x: r.left + r.width/2, y: r.top + r.height/2 - 8 };
-}
-
-function doKiss(){
+/* Bunny interaction */
+const bunny = document.getElementById('bunny');
+const bubble = document.getElementById('bubble');
+let last = 0;
+function doKiss(clientX, clientY){
   const now = Date.now();
-  if(now - lastAction < 400) return;
-  lastAction = now;
-  const wrap = document.querySelector('.wrap');
-  wrap.classList.add('pucker');
-  wrap.classList.add('blink');
+  if(now - last < 350) return;
+  last = now;
   bubble.classList.add('show');
   setTimeout(()=> bubble.classList.remove('show'), 1200);
-  const center = mouthCenterClient();
-  for(let i=0;i<5;i++){
-    setTimeout(()=> spawnHeart(center.x + (Math.random()*8-4), center.y + (Math.random()*8-4)), i*90);
+  const mouth = document.getElementById('mouth');
+  const mouthRect = mouth.getBoundingClientRect();
+  const centerX = mouthRect.left + mouthRect.width/2;
+  const centerY = mouthRect.top + mouthRect.height/2;
+  for(let i=0;i<6;i++){
+    setTimeout(()=> spawnHeartAt(centerX + (Math.random()*26-13), centerY + (Math.random()*14-7)), i*85);
   }
-  setTimeout(()=> { wrap.classList.remove('pucker'); wrap.classList.remove('blink'); }, 520);
+  bunny.animate([{transform:'scale(1)'},{transform:'scale(1.05)'},{transform:'scale(1)'}], {duration:420, easing:'ease'});
 }
+bunny.addEventListener('click', (e)=> doKiss(e.clientX, e.clientY));
+bunny.addEventListener('keydown', (e)=> { if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); doKiss(window.innerWidth/2, window.innerHeight/2); } });
 
-charBtn.addEventListener('click', (e)=> { doKiss(); });
-charBtn.addEventListener('keydown', (e)=> { if(e.key === ' ' || e.key === 'Enter') { e.preventDefault(); doKiss(); } });
+/* Background controls */
+const body = document.body;
+const presetButtons = qsa('#bgPresets .bg-button');
+function clearActive(){
+  presetButtons.forEach(b=> b.classList.remove('active'));
+}
+function applyBG(name){
+  body.classList.remove('bg-soft','bg-night','bg-sky','bg-aurora');
+  if(name === 'soft') body.classList.add('bg-soft');
+  if(name === 'night') body.classList.add('bg-night');
+  if(name === 'sky') body.classList.add('bg-sky');
+  if(name === 'aurora') body.classList.add('bg-aurora');
+  clearActive();
+  const btn = qsa('#bgPresets .bg-button').find(x=> x.dataset.bg === name);
+  if(btn) btn.classList.add('active');
+}
+qsa('#bgPresets .bg-button').forEach(btn=>{
+  const name = btn.dataset.bg;
+  if(!name) return;
+  btn.addEventListener('click', ()=> applyBG(name));
+});
+document.getElementById('randomBg').addEventListener('click', ()=>{
+  const choices = ['soft','night','sky','aurora'];
+  applyBG(choices[Math.floor(Math.random()*choices.length)]);
+});
+document.getElementById('resetBg').addEventListener('click', ()=>{
+  body.classList.remove('bg-soft','bg-night','bg-sky','bg-aurora');
+  clearActive();
+});
 
-setInterval(()=> {
-  const n = document.getElementById('nameText');
-  n.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}], {duration:900, easing:'ease', iterations:1});
-}, 5200);
+/* auto name - toggles showing only first name */
+const autoBtn = document.getElementById('autoName');
+let autoFirst = true;
+autoBtn.classList.toggle('active', true);
+autoBtn.addEventListener('click', ()=>{
+  autoFirst = !autoFirst;
+  autoBtn.classList.toggle('active', autoFirst);
+  const fullParam = new URLSearchParams(location.search).get('name') || '';
+  const cleaned = sanitizeName(fullParam);
+  if(autoFirst && cleaned.includes(' ')){
+    const first = cleaned.split(' ')[0];
+    document.getElementById('nameText').textContent = first;
+    document.getElementById('smallText').textContent = `i love you, ${first}`;
+  } else {
+    document.getElementById('nameText').textContent = cleaned || 'you';
+    document.getElementById('smallText').textContent = cleaned ? `i love you, ${cleaned}` : 'i love you';
+  }
+});
 
-(function createSR(){
-  const sr = document.createElement('div');
-  sr.setAttribute('aria-live','polite');
-  sr.style.position='absolute'; sr.style.left='-9999px';
-  document.body.appendChild(sr);
-  const origDoKiss = doKiss;
-  window.doKiss = function(){ origDoKiss(); sr.textContent = document.getElementById('bubble').textContent; };
-})();
+/* keyboard focus */
+bunny.setAttribute('tabindex','0');
+
+/* Initialize: default background -> soft */
+applyBG('soft');
 </script>
 </body>
 </html>
-Add index.html (cute kissy page)
-Update page: cute bunny, name + backgrounds
