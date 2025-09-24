@@ -1,2 +1,144 @@
 # cute-kissy
 surprise page
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>tiny kissy surprise</title>
+<style>
+  :root{--bg:#071028;--accent:#ff6b9a;--muted:#9fb0c8}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#e7f2ff;background:
+    radial-gradient(circle at 10% 10%, rgba(124,92,255,0.06), transparent 10%),
+    linear-gradient(180deg,#071028 0%, #031323 100%);display:grid;place-items:center;}
+  .wrap{width:min(680px,96vw);padding:28px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 10px 30px rgba(1,8,20,0.7);text-align:center;position:relative}
+  h1{margin:0 0 6px;font-size:1.3rem}
+  p.lead{margin:0 0 14px;color:var(--muted)}
+  .stage{position:relative;height:320px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .char-btn{width:200px;height:200px;border-radius:999px;display:grid;place-items:center;cursor:pointer;pointer-events:auto}
+  svg{width:170px;height:170px;display:block}
+  #mouth{transform-origin:center;transition:transform 160ms cubic-bezier(.2,.8,.2,1)}
+  .pucker #mouth{transform:scaleX(.45) translateY(6px) scaleY(.9)}
+  .blink #eye-l, .blink #eye-r{transform:scaleY(.2);transition:transform 120ms linear}
+  .bubble{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:12px;padding:10px 14px;border:1px solid rgba(255,255,255,0.03);font-weight:600;opacity:0;transform-origin:bottom center;transition:all 260ms ease}
+  .bubble.show{opacity:1;transform:translateX(-50%) translateY(-8px) scale(1)}
+  .heart { position:absolute; font-size:20px; pointer-events:none; transform:translate(-50%,0) scale(.9); opacity:1; will-change:transform,opacity; animation:floatUp 1400ms cubic-bezier(.2,.9,.25,1); text-shadow:0 2px 6px rgba(0,0,0,0.45); }
+  @keyframes floatUp {
+    0% { transform: translate(-50%,0) translateX(0) scale(.9); opacity:1; }
+    40% { transform: translate(-50%,-50px) translateX(var(--x)) scale(1.05); opacity:1; }
+    100% { transform: translate(-50%,-150px) translateX(calc(var(--x) * 1.6)) scale(.8) rotate(30deg); opacity:0; }
+  }
+  .hint{margin-top:12px;color:var(--muted);font-size:0.9rem}
+  @media (max-width:420px){ .wrap{padding:20px} .stage{height:260px} }
+</style>
+</head>
+<body>
+  <main class="wrap" aria-label="Cute kissy surprise">
+    <h1 id="title">For <span id="nameText">you</span> — click to get kisses</h1>
+    <p class="lead">Click or tap the face to make it blow kisses. Save the file and share the link!</p>
+
+    <div class="stage" id="stage">
+      <div class="char-btn" id="charBtn" role="button" aria-pressed="false" tabindex="0" title="Click me!">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="skin" x1="0" x2="1">
+              <stop offset="0" stop-color="#ffd9c2"/>
+              <stop offset="1" stop-color="#ffb79b"/>
+            </linearGradient>
+            <radialGradient id="cheekGrad" cx="50%" cy="50%">
+              <stop offset="0" stop-color="#ff8fb2"/>
+              <stop offset="1" stop-color="#ff6b9a"/>
+            </radialGradient>
+          </defs>
+
+          <circle cx="60" cy="60" r="46" fill="url(#skin)" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+          <g id="eyes">
+            <ellipse id="eye-l" cx="44" cy="52" rx="6" ry="5.2" fill="#082" transform="none"/>
+            <ellipse id="eye-r" cx="76" cy="52" rx="6" ry="5.2" fill="#082" transform="none"/>
+          </g>
+          <ellipse cx="45" cy="70" rx="8" ry="5" fill="url(#cheekGrad)" opacity="0.95"/>
+          <ellipse cx="75" cy="70" rx="8" ry="5" fill="url(#cheekGrad)" opacity="0.95"/>
+          <g id="mouth" transform="translate(60,86)">
+            <ellipse cx="0" cy="0" rx="10" ry="6" fill="#882b58"/>
+            <ellipse cx="-1" cy="-1" rx="6" ry="3" fill="#ff6b9a" opacity="0.9"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="bubble" id="bubble" role="status" aria-live="polite">i love you 💖</div>
+    </div>
+
+    <div class="hint">Tip: press space or enter when focused on the face (accessibility)</div>
+  </main>
+
+<script>
+(function setNameFromURL(){
+  const params = new URLSearchParams(location.search);
+  const n = params.get('name');
+  if(n){
+    const clean = n.replace(/[<>]/g,'').trim().slice(0,24);
+    document.getElementById('nameText').textContent = clean || 'you';
+    document.getElementById('bubble').textContent = `i love you, ${clean} ❤`;
+  }
+})();
+
+const charBtn = document.getElementById('charBtn');
+const stage = document.getElementById('stage');
+const bubble = document.getElementById('bubble');
+
+let lastAction = 0;
+function spawnHeart(x,y){
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  const hearts = ['💖','💗','💕','💘','❣️','❤️'];
+  heart.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+  const randX = (Math.random()*60 - 30) + 'px';
+  heart.style.setProperty('--x', randX);
+  const rect = stage.getBoundingClientRect();
+  heart.style.left = (x - rect.left) + 'px';
+  heart.style.top = (y - rect.top) + 'px';
+  stage.appendChild(heart);
+  heart.addEventListener('animationend', ()=> heart.remove());
+}
+
+function mouthCenterClient() {
+  const mouth = document.getElementById('mouth');
+  const r = mouth.getBoundingClientRect();
+  return { x: r.left + r.width/2, y: r.top + r.height/2 - 8 };
+}
+
+function doKiss(){
+  const now = Date.now();
+  if(now - lastAction < 400) return;
+  lastAction = now;
+  const wrap = document.querySelector('.wrap');
+  wrap.classList.add('pucker');
+  wrap.classList.add('blink');
+  bubble.classList.add('show');
+  setTimeout(()=> bubble.classList.remove('show'), 1200);
+  const center = mouthCenterClient();
+  for(let i=0;i<5;i++){
+    setTimeout(()=> spawnHeart(center.x + (Math.random()*8-4), center.y + (Math.random()*8-4)), i*90);
+  }
+  setTimeout(()=> { wrap.classList.remove('pucker'); wrap.classList.remove('blink'); }, 520);
+}
+
+charBtn.addEventListener('click', (e)=> { doKiss(); });
+charBtn.addEventListener('keydown', (e)=> { if(e.key === ' ' || e.key === 'Enter') { e.preventDefault(); doKiss(); } });
+
+setInterval(()=> {
+  const n = document.getElementById('nameText');
+  n.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}], {duration:900, easing:'ease', iterations:1});
+}, 5200);
+
+(function createSR(){
+  const sr = document.createElement('div');
+  sr.setAttribute('aria-live','polite');
+  sr.style.position='absolute'; sr.style.left='-9999px';
+  document.body.appendChild(sr);
+  const origDoKiss = doKiss;
+  window.doKiss = function(){ origDoKiss(); sr.textContent = document.getElementById('bubble').textContent; };
+})();
+</script>
+</body>
+</html>
